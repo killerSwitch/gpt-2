@@ -29,6 +29,10 @@ parser.add_argument('--model_name', metavar='MODEL', type=str, default='117M', h
 parser.add_argument('--combine', metavar='CHARS', type=int, default=50000, help='Concatenate input files with <|endoftext|> separator into chunks of this minimum size')
 parser.add_argument('--encoding', type=str, default='utf-8', help='Set the encoding for reading and writing files.')
 
+parser.add_argument('--ckpt_dir', type=str, default='checkpoint', help='Checkpoint Directory')
+parser.add_argument('--samples_dir', type=str, default='samples', help='Samples Directory')
+
+parser.add_argument('--steps', type=int, default=1000, help='Number of steps the model will run')
 parser.add_argument('--batch_size', metavar='SIZE', type=int, default=1, help='Batch size')
 parser.add_argument('--learning_rate', metavar='LR', type=float, default=0.00002, help='Learning rate for Adam')
 parser.add_argument('--accumulate_gradients', metavar='N', type=int, default=1, help='Accumulate gradients across N minibatches.')
@@ -71,6 +75,10 @@ def randomize(context, hparams, p):
 
 def main():
     args = parser.parse_args()
+    
+    CHECKPOINT_DIR = args.ckpt_dir
+    SAMPLE_DIR = args.samples_dir
+    
     enc = encoder.get_encoder(args.model_name)
     hparams = model.default_hparams()
     with open(os.path.join('models', args.model_name, 'hparams.json')) as f:
@@ -255,7 +263,7 @@ def main():
         start_time = time.time()
 
         try:
-            while True:
+            while counter<=args.steps:
                 if counter % args.save_every == 0:
                     save()
                 if counter % args.sample_every == 0:
